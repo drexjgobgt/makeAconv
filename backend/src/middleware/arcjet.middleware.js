@@ -5,6 +5,8 @@ export const arcjetProtection = async (req, res, next) => {
   try {
     const decision = await aj.protect(req);
 
+    console.log("Arcjet decision:", decision);
+
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
         return res
@@ -13,17 +15,17 @@ export const arcjetProtection = async (req, res, next) => {
       } else if (decision.reason.isBot()) {
         return res.status(403).json({ message: "Bot access denied." });
       } else {
-        return res
-          .status(403)
-          .json({ message: "Access denied by security policy." });
+        return res.status(403).json({
+          message: "Access denied by security policy.",
+        });
       }
     }
 
-    //checked for spoofed bot
+    // check for spoofed bots
     if (decision.results.some(isSpoofedBot)) {
       return res.status(403).json({
         error: "Spoofed bot detected",
-        message: "Malicious bot activity detected",
+        message: "Malicious bot activity detected.",
       });
     }
 
