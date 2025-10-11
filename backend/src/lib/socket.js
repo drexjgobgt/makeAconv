@@ -4,6 +4,9 @@ import { socketAuthMiddleware } from "../middleware/socket.auth.middleware.js";
 
 let io;
 
+// this is for storing online users
+const userSocketMap = {}; // {userId:socketId}
+
 export function setupSocket(server) {
   io = new Server(server, {
     cors: {
@@ -14,9 +17,6 @@ export function setupSocket(server) {
 
   // apply authentication middleware to all socket connections
   io.use(socketAuthMiddleware);
-
-  // this is for storing online users
-  const userSocketMap = {}; // {userId:socketId}
 
   io.on("connection", (socket) => {
     console.log("A user connected", socket.user.fullName);

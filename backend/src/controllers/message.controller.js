@@ -22,6 +22,11 @@ export const getMessageByUserId = async (req, res) => {
     const myId = req.user._id;
     const { id: userToChatId } = req.params;
 
+    // Validate userToChatId format
+    if (!userToChatId || !/^[a-fA-F0-9]{24}$/.test(userToChatId)) {
+      return res.status(400).json({ message: "Invalid user ID format." });
+    }
+
     const messages = await Message.find({
       $or: [
         { senderId: myId, receiverId: userToChatId },
@@ -31,6 +36,10 @@ export const getMessageByUserId = async (req, res) => {
 
     res.status(200).json(messages);
   } catch (error) {
+    if (error.name === "CastError") {
+      console.log("CastError in getMessageByUserId:", error.message);
+      return res.status(400).json({ message: "Invalid ID format." });
+    }
     console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -57,9 +66,14 @@ export const sendMessage = async (req, res) => {
 
     let imageUrl;
     if (image) {
-      // upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
+      try {
+        // upload base64 image to cloudinary
+        const uploadResponse = await cloudinary.uploader.upload(image);
+        imageUrl = uploadResponse.secure_url;
+      } catch (cloudinaryError) {
+        console.log("Cloudinary upload error:", cloudinaryError.message);
+        return res.status(400).json({ message: "Invalid image data." });
+      }
     }
 
     const newMessage = new Message({
