@@ -9,6 +9,7 @@ export const useChatStore = create((set, get) => ({
   messages: [],
   activeTab: "chats",
   selectedUser: null,
+  showSidebar: true,
   isUsersLoading: false,
   isMessagesLoading: false,
   isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
@@ -19,7 +20,15 @@ export const useChatStore = create((set, get) => ({
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (selectedUser) => {
+    set({ selectedUser });
+    if (selectedUser) {
+      set({ showSidebar: false });
+    } else {
+      set({ showSidebar: true });
+    }
+  },
+  toggleSidebar: () => set({ showSidebar: !get().showSidebar }),
 
   getAllContacts: async () => {
     set({ isUsersLoading: true });
