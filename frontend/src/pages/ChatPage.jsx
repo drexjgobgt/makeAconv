@@ -1,48 +1,42 @@
+import { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
-import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
-import ProfileHeader from "../components/ProfileHeader";
-import ActiveTabSwitch from "../components/ActiveTabSwitch";
-import ChatsList from "../components/ChatsList";
-import ContactList from "../components/ContactList";
-import ChatContainer from "../components/ChatContainer";
-import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
+import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
+import { useAuthStore } from "../store/useAuthStore";
 
-function ChatPage() {
-  const { activeTab, selectedUser, showSidebar } = useChatStore();
+function ContactList() {
+  const { getAllContacts, allContacts, setSelectedUser, isUsersLoading } =
+    useChatStore();
+  const { onlineUsers } = useAuthStore();
+
+  useEffect(() => {
+    getAllContacts();
+  }, [getAllContacts]);
+
+  if (isUsersLoading) return <UsersLoadingSkeleton />;
 
   return (
-    <div className="relative flex min-h-screen bg-slate-950 p-0 md:p-1">
-      <div
-        className={`relative w-full ${
-          selectedUser ? "md:max-w-none max-w-full" : "max-w-full"
-        } flex flex-col md:flex-row overflow-hidden bg-slate-900/40 backdrop-blur-lg`}
-      >
-        {/* LEFT SIDE - Sidebar */}
+    <>
+      {allContacts.map((contact) => (
         <div
-          className={`w-full md:w-72 bg-slate-800/40 backdrop-blur-md flex flex-col overflow-y-auto border-r border-slate-700/40 ${
-            selectedUser && !showSidebar ? "md:hidden" : ""
-          }`}
-          style={{ height: "100vh" }}
+          key={contact._id}
+          className="bg-cyan-500/10 p-3 sm:p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 hover:scale-[1.02] transition-all"
+          onClick={() => setSelectedUser(contact)}
         >
-          <div className="sticky top-0 z-10 bg-slate-800/60 backdrop-blur-md border-b border-slate-700/40">
-            <ProfileHeader />
-            <ActiveTabSwitch />
-          </div>
-
-          <div className="flex-1 p-2 space-y-3">
-            {activeTab === "chats" ? <ChatsList /> : <ContactList />}
-          </div>
-        </div>
-
-        {/* RIGHT SIDE - Main Chat Area (made wider) */}
-        <div className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-md min-h-0 p-0 md:p-1">
-          <div className="flex-1 overflow-hidden bg-slate-900/60">
-            {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
+          <div className="flex items-center gap-3">
+            <div
+              className={`avatar ${
+                onlineUsers.includes(contact._id) ? "online" : "offline"
+              }`}
+            >
+              <div className="size-12 rounded-full">
+                <img src={contact.profilePic || "/avatar.png"} />
+              </div>
+            </div>
+            <h4 className="text-slate-200 font-medium">{contact.fullName}</h4>
           </div>
         </div>
-      </div>
-    </div>
+      ))}
+    </>
   );
 }
-
-export default ChatPage;
+export default ContactList;
