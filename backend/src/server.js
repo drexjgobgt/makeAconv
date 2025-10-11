@@ -1,11 +1,13 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import path from "path";
+import http from "http";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { connectDB } from "./lib/db.js";
 import { ENV } from "./lib/env.js";
+import { setupSocket } from "./lib/socket.js";
 import cors from "cors";
 
 const app = express();
@@ -13,7 +15,7 @@ const __dirname = path.resolve();
 
 const PORT = ENV.PORT || 3000;
 
-app.use(express.json()); //req body
+app.use(express.json({ limit: "10mb" })); //req body
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true })); //CORS
 app.use(cookieParser());
 
@@ -28,7 +30,11 @@ if (ENV.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
 }
-app.listen(PORT, () => {
+
+const server = http.createServer(app);
+setupSocket(server);
+
+server.listen(PORT, () => {
   console.log("SERVER RUNNING ON PORT : " + PORT);
   connectDB();
 });
