@@ -65,18 +65,20 @@ flowchart LR
 ## ⚙️ Cara Menjalankan Proyek (Local)
 # 1️⃣ Clone repository
 git clone https://github.com/drexjgobgt/makeAconv.git
+
 cd makeAconv
 
 # 2️⃣ Install dependencies
 npm install
 
 # 3️⃣ Jalankan server backend
-cd server
-node index.js
+cd backend
+
+npm run dec
 
 # 4️⃣ Jalankan frontend React
-cd ../client
-npm start
+cd ../frontend
+npm run dev
 
 ## 👨‍💻 Pengembang
 
